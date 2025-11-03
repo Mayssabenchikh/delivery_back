@@ -5,5 +5,7 @@ const { validateSignUp } = require('../middlewares/validation.middleware');
 
 // POST /api/auth/signup
 router.post('/signup', validateSignUp, authController.signUp);
+router.post('/login', authController.login);
+
 
 module.exports = router;
