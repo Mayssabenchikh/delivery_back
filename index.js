@@ -1,31 +1,36 @@
 const express = require('express');
-const connection = require('./connect.js'); // Assure-toi que le fichier connect.js existe et exporte bien la connexion
-const companyRoutes = require('./controllers/company.js');
-
+const connection = require('./connect.js'); 
 const cors = require('cors');
-
+const company = require('./routes/company'); 
 const app = express();
+
+
+
+
 const PORT = 3200;
-
-
 app.use(cors({
-    origin: 'http://localhost:4200', // Angular app URL
+    origin: 'http://localhost:4200', 
     methods: ['GET','POST','PUT','DELETE'],
     credentials: true
 }));
-
-
-// Middleware pour parser le JSON
 app.use(express.json());
 
-app.use('/api/company', companyRoutes);
+
+
+app.use('/company', company);
+
+
+
+
+
+
+
 
 
 // Route de base pour vérifier que le backend fonctionne
 app.get('/', (req, res) => {
   res.send('✅ Backend Express fonctionne 🚀');
 });
-
 // Route pour tester la connexion MySQL
 app.get('/test-db', (req, res) => {
   connection.query('SELECT 1 + 1 AS result', (err, results) => {
