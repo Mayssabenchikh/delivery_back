@@ -2,20 +2,51 @@ const express = require('express');
 const router = express.Router();
 const Company = require('../models/company');
 const User = require('../models/user');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-// Inscription complète : User + Company
-router.post('/register', (req, res) => {
+// Créer le dossier uploads s'il n'existe pas
+const uploadDir = 'uploads';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configuration de multer pour l'upload d'images
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // le fichier reste dans /uploads
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname); // garde juste le nom du fichier
+  }
+});
+
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only image files are allowed!'), false);
+    }
+};
+
+const upload = multer({ 
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
+
+// Inscription complète : User + Company avec upload d'image
+router.post('/register', upload.single('logo'), (req, res) => {
     const { 
-        // Champs pour users
         email, 
         password, 
         address,
-        phone,          // ← Ajouté
-        // Champs pour companies
-        name,           // Company Name
-        logo_url,       // Upload Company Logo
-        tax_id,         // Tax ID
-        legal_status    // Legal Status
+        phone,
+        name,
+        tax_id,
+        legal_status
     } = req.body;
 
     // Validation des champs obligatoires
@@ -23,15 +54,18 @@ router.post('/register', (req, res) => {
         return res.status(400).json({ error: 'Email, password et nom de la company sont requis' });
     }
 
+    // Récupérer le chemin du logo uploadé
+const logo_url = req.file ? req.file.filename : '';
+
     // Étape 1 : Créer l'utilisateur
     const newUser = new User({
         name: '',
         email: email,
-        phone: phone || '',        // ← Phone du formulaire
+        phone: phone || '',
         password: password,
         role: 'company',
         address: address || '',
-        status: 'active',
+        status: 'suspended',
         verified: 0
     });
 
@@ -44,11 +78,11 @@ router.post('/register', (req, res) => {
             });
         }
 
-        // Étape 2 : Créer la company
+        // Étape 2 : Créer la company avec le logo_url
         const newCompany = new Company({
             user_id: userId,
             name: name,
-            logo_url: logo_url || '',
+            logo_url: logo_url,
             tax_id: tax_id || '',
             legal_status: legal_status || ''
         });
@@ -65,7 +99,8 @@ router.post('/register', (req, res) => {
             res.status(201).json({ 
                 message: 'Inscription réussie',
                 user_id: userId,
-                company_id: companyId
+                company_id: companyId,
+                logo_url: logo_url
             });
         });
     });

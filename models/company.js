@@ -38,17 +38,19 @@ Company.create = function (newCompany, result) {
     });
 };
 // Get all Company records
-Company.findAll = function (result) {
-    dbConn.query("SELECT * FROM companies ", function (err, res) {
+Company.findAll = function(result) {
+    dbConn.query("SELECT * FROM companies", function(err, res) {
         if (err) {
             console.log("error: ", err);
-            result(null, err);
+            result(null,err);
         } else {
-            console.log('Company : ', res);
+            console.log("Company: ", res);
             result(null, res);
         }
     });
 };
+
+
 
 
 
