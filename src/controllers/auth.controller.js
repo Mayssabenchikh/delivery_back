@@ -1,9 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../config/database');
+const pool = require('../config/database');
+const sendEmail = require('./models/sendEmail');
 
 exports.signUp = async (req, res) => {
-  const connection = await db.getConnection();
+  const connection = await pool.getConnection();
 
   try {
     const { name, email, phone, address, password } = req.body;
@@ -62,8 +63,10 @@ exports.login = async (req, res) => {
     return res.status(400).json({ message: 'Email and password required' });
   }
 
+  const connection = await pool.getConnection();
+
   try {
-    const [results] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
+    const [results] = await connection.execute('SELECT * FROM users WHERE email = ?', [email]);
 
     if (!results || results.length === 0) {
       console.log('[LOGIN] User not found for email:', email);
@@ -103,5 +106,74 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error('[LOGIN] Error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
+  } finally {
+    connection.release();
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  const connection = await pool.getConnection();
+
+  try {
+    const [users] = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No user found with this email' });
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes later
+
+    await connection.query(
+      'UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE email = ?',
+      [code, expiresAt, email]
+    );
+
+    await sendEmail(
+      email,
+      'Password Reset Code',
+      `Your password reset code is ${code}. It expires in 15 minutes.`
+    );
+
+    res.json({ message: 'Reset code sent to your email' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  } finally {
+    connection.release();
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { email, code, newPassword } = req.body;
+  const connection = await pool.getConnection();
+
+  try {
+    const [users] = await connection.query(
+      'SELECT * FROM users WHERE email = ? AND reset_code = ?',
+      [email, code]
+    );
+
+    if (users.length === 0)
+      return res.status(400).json({ message: 'Invalid code or email' });
+
+    const user = users[0];
+    if (new Date(user.reset_code_expires) < new Date()) {
+      return res.status(400).json({ message: 'Code has expired' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await connection.query(
+      'UPDATE users SET password = ?, reset_code = NULL, reset_code_expires = NULL WHERE email = ?',
+      [hashedPassword, email]
+    );
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  } finally {
+    connection.release();
   }
 };

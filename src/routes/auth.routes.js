@@ -7,6 +7,9 @@ const { validateSignUp } = require('../middlewares/validation.middleware');
 router.post('/signup', validateSignUp, authController.signUp);
 router.post('/login', authController.login);
 
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
+
 
 module.exports = router;
 
