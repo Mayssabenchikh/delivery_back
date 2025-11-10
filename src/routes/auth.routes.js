@@ -9,3 +9,7 @@ router.post('/login', authController.login);
 
 
 module.exports = router;
+
+router.get('/test', (req, res) => {
+  res.json({ message: 'Test route works' });
+});
