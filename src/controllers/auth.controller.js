@@ -144,8 +144,8 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-exports.resetPassword = async (req, res) => {
-  const { email, code, newPassword } = req.body;
+exports.verifyResetCode = async (req, res) => {
+  const { email, code } = req.body;
   const connection = await pool.getConnection();
 
   try {
@@ -154,12 +154,39 @@ exports.resetPassword = async (req, res) => {
       [email, code]
     );
 
-    if (users.length === 0)
+    if (users.length === 0) {
       return res.status(400).json({ message: 'Invalid code or email' });
+    }
 
     const user = users[0];
     if (new Date(user.reset_code_expires) < new Date()) {
       return res.status(400).json({ message: 'Code has expired' });
+    }
+
+    res.json({ 
+      success: true,
+      message: 'Code verified successfully' 
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  } finally {
+    connection.release();
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+  const connection = await pool.getConnection();
+
+  try {
+    const [users] = await connection.query(
+      'SELECT * FROM users WHERE email = ?',
+      [email]
+    );
+
+    if (users.length === 0) {
+      return res.status(400).json({ message: 'User not found' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -169,7 +196,10 @@ exports.resetPassword = async (req, res) => {
       [hashedPassword, email]
     );
 
-    res.json({ message: 'Password updated successfully' });
+    res.json({ 
+      success: true,
+      message: 'Password updated successfully' 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
