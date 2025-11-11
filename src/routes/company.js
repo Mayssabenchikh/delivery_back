@@ -63,7 +63,7 @@ const logo_url = req.file ? req.file.filename : '';
 
     // Étape 1 : Créer l'utilisateur
     const newUser = new User({
-        name: '',
+        name: name,
         email: email,
         phone: phone || '',
         password: password,

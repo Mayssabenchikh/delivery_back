@@ -1,7 +1,7 @@
 'use strict';
 const db = require('../../config/database');
+const bcrypt = require('bcryptjs');
 
-// Define the User model
 var User = function (user) {
     this.name = user.name;
     this.email = user.email;
@@ -13,9 +13,12 @@ var User = function (user) {
     this.verified = user.verified;
 };
 
-// Create a new User record
 User.create = async function (newUser, result) {
     try {
+        if (newUser.password) {
+            newUser.password = await bcrypt.hash(newUser.password, 10);
+        }
+        
         const [res] = await db.query("INSERT INTO users SET ?", newUser);
         console.log("User created with ID: ", res.insertId);
         result(null, res.insertId);

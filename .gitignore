@@ -4,5 +4,7 @@
 # Dependencies
 node_modules/
 
-# VS Code local history (auto backups)
+# VS Code local history
 .history/
+
+uploads/*
