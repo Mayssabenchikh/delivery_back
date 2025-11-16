@@ -10,9 +10,7 @@ router.post('/login', authController.login);
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/verify-reset-code', authController.verifyResetCode);
 router.post('/reset-password', authController.resetPassword);
-
-router.get('/test', (req, res) => {
-  res.json({ message: 'Test route works' });
-});
+router.get('/verify-email', authController.verifyEmail);
+router.post('/resend-verification', authController.resendVerificationEmail);
 
 module.exports = router;

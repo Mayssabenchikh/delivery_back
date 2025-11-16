@@ -7,7 +7,6 @@ exports.updateProfile = async (req, res) => {
     try {
         const { name, email, phone, address } = req.body;
 
-        // Validate required fields
         if (!name || !email || !phone || !address) {
             return res.status(400).json({
                 success: false,
@@ -15,7 +14,6 @@ exports.updateProfile = async (req, res) => {
             });
         }
 
-        // Check if user exists with this email
         const [users] = await connection.execute(
             'SELECT id FROM users WHERE email = ?',
             [email]
@@ -30,13 +28,10 @@ exports.updateProfile = async (req, res) => {
 
         const userId = users[0].id;
 
-        // Update user profile (excluding email)
         await connection.execute(
             'UPDATE users SET name = ?, phone = ?, address = ? WHERE email = ?',
             [name, phone, address, email]
         );
-
-        // Fetch updated user data
         const [updatedUser] = await connection.execute(
             'SELECT id, name, email, phone, address, role, status, verified, created_at FROM users WHERE id = ?',
             [userId]
@@ -61,7 +56,7 @@ exports.getProfile = async (req, res) => {
     const connection = await pool.getConnection();
 
     try {
-        const { email } = req.query; // Get email from query parameter
+        const { email } = req.query;
 
         if (!email) {
             return res.status(400).json({
@@ -100,17 +95,15 @@ exports.verifyPassword = async (req, res) => {
     const connection = await pool.getConnection();
 
     try {
-        const { email, curentPassword } = req.body;
+        const { email, currentPassword } = req.body;
 
-        // Validate required fields
-        if (!email || !curentPassword) {
+        if (!email || !currentPassword) {
             return res.status(400).json({
                 success: false,
                 message: 'Email and current password are required'
             });
         }
 
-        // Get user by email
         const [users] = await connection.execute(
             'SELECT id, password FROM users WHERE email = ?',
             [email]
@@ -125,8 +118,7 @@ exports.verifyPassword = async (req, res) => {
 
         const user = users[0];
 
-        // Verify password
-        const isValidPassword = await bcrypt.compare(curentPassword, user.password);
+        const isValidPassword = await bcrypt.compare(currentPassword, user.password);
         
         if (!isValidPassword) {
             return res.status(400).json({
@@ -155,7 +147,6 @@ exports.deleteAccount = async (req, res) => {
     try {
         const { UserId, email, password } = req.body;
 
-        // Validate required fields
         if (!UserId || !email || !password) {
             return res.status(400).json({
                 success: false,
@@ -163,7 +154,6 @@ exports.deleteAccount = async (req, res) => {
             });
         }
 
-        // Get user by email and id
         const [users] = await connection.execute(
             'SELECT id, password FROM users WHERE email = ? AND id = ?',
             [email, UserId]
@@ -178,7 +168,6 @@ exports.deleteAccount = async (req, res) => {
 
         const user = users[0];
 
-        // Verify password before deletion
         const isValidPassword = await bcrypt.compare(password, user.password);
         
         if (!isValidPassword) {
@@ -187,8 +176,6 @@ exports.deleteAccount = async (req, res) => {
                 message: 'Incorrect password'
             });
         }
-
-        // Delete the user account
         await connection.execute(
             'DELETE FROM users WHERE id = ?',
             [user.id]
