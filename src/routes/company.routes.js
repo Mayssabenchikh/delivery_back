@@ -110,4 +110,7 @@ const logo_url = req.file ? req.file.filename : '';
     });
 });
 
+// Route pour récupérer toutes les companies
+router.get('/all', require('../controllers/company.controller').getAllCompanies);
+
 module.exports = router;
