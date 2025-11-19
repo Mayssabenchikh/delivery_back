@@ -100,11 +100,13 @@ const logo_url = req.file ? req.file.filename : '';
                 });
             }
 
+            const fullLogoUrl = logo_url ? `${process.env.SERVER_URL || 'http://localhost:3200'}/uploads/${logo_url}` : null;
+
             res.status(201).json({ 
                 message: 'Inscription réussie',
                 user_id: userId,
                 company_id: companyId,
-                logo_url: logo_url
+                logo_url: fullLogoUrl
             });
         });
     });
