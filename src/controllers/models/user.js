@@ -28,4 +28,69 @@ User.create = async function (newUser, result) {
     }
 };
 
+
+
+// ----------------- READ ALL -----------------
+User.getAll = async function (result) {
+    try {
+        const [rows] = await db.query("SELECT * FROM users");
+        result(null, rows);
+    } catch (err) {
+        console.log("error: ", err);
+        result(err, null);
+    }
+};
+
+
+// ----------------- READ BY ID -----------------
+User.getById = async function (id, result) {
+    try {
+        const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [id]);
+        if (rows.length) {
+            result(null, rows[0]);
+        } else {
+            result({ kind: "not_found" }, null);
+        }
+    } catch (err) {
+        console.log("error: ", err);
+        result(err, null);
+    }
+};
+
+// ----------------- UPDATE -----------------
+User.update = async function (id, user, result) {
+    try {
+        if (user.password) {
+            user.password = await bcrypt.hash(user.password, 10);
+        }
+
+        const [res] = await db.query("UPDATE users SET ? WHERE id = ?", [user, id]);
+        if (res.affectedRows == 0) {
+            result({ kind: "not_found" }, null);
+        } else {
+            console.log("User updated with ID: ", id);
+            result(null, res);
+        }
+    } catch (err) {
+        console.log("error: ", err);
+        result(err, null);
+    }
+};
+
+// ----------------- DELETE -----------------
+User.delete = async function (id, result) {
+    try {
+        const [res] = await db.query("DELETE FROM users WHERE id = ?", [id]);
+        if (res.affectedRows == 0) {
+            result({ kind: "not_found" }, null);
+        } else {
+            console.log("User deleted with ID: ", id);
+            result(null, res);
+        }
+    } catch (err) {
+        console.log("error: ", err);
+        result(err, null);
+    }
+};
+
 module.exports = User;

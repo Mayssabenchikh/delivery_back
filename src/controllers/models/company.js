@@ -22,16 +22,61 @@ Company.create = async function (newCompany, result) {
         result(err, null);
     }
 };
-
-// Get all Company records
-Company.findAll = async function (result) {
+// ----------------- READ ALL -----------------
+Company.getAll = async function (result) {
     try {
-        const [res] = await db.query("SELECT * FROM companies");
-        console.log("Company: ", res);
-        result(null, res);
+        const [rows] = await db.query("SELECT * FROM companies");
+        result(null, rows);
     } catch (err) {
         console.log("error: ", err);
-        result(null, err);
+        result(err, null);
+    }
+};
+
+// ----------------- READ BY ID -----------------
+Company.getById = async function (id, result) {
+    try {
+        const [rows] = await db.query("SELECT * FROM companies WHERE id = ?", [id]);
+        if (rows.length) {
+            result(null, rows[0]);
+        } else {
+            result({ kind: "not_found" }, null);
+        }
+    } catch (err) {
+        console.log("error: ", err);
+        result(err, null);
+    }
+};
+
+// ----------------- UPDATE -----------------
+Company.update = async function (id, company, result) {
+    try {
+        const [res] = await db.query("UPDATE companies SET ? WHERE id = ?", [company, id]);
+        if (res.affectedRows == 0) {
+            result({ kind: "not_found" }, null);
+        } else {
+            console.log("Company updated with ID: ", id);
+            result(null, res);
+        }
+    } catch (err) {
+        console.log("error: ", err);
+        result(err, null);
+    }
+};
+
+// ----------------- DELETE -----------------
+Company.delete = async function (id, result) {
+    try {
+        const [res] = await db.query("DELETE FROM companies WHERE id = ?", [id]);
+        if (res.affectedRows == 0) {
+            result({ kind: "not_found" }, null);
+        } else {
+            console.log("Company deleted with ID: ", id);
+            result(null, res);
+        }
+    } catch (err) {
+        console.log("error: ", err);
+        result(err, null);
     }
 };
 
