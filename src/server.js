@@ -22,7 +22,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/company', companyRoutes);
 app.use('/user', userRoutes);       // nouveau : toutes les routes User préfixées par /user
 
-
+// Servir les fichiers uploadés (MUST use ../ since server.js is in src/)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -38,8 +39,7 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Servir les fichiers uploadés
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 
 

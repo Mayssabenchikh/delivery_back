@@ -29,7 +29,8 @@ router.post('/register', upload.single('logo'), (req, res) => {
         return res.status(400).json({ error: 'Email, password et nom de la company sont requis' });
     }
 
-    const logo_url = req.file ? req.file.filename : '';
+    const baseUrl = process.env.SERVER_URL || 'http://localhost:3200';
+    const logo_url = req.file ? `${baseUrl}/uploads/${req.file.filename}` : '';
 
     const newUser = new User({
         name,
