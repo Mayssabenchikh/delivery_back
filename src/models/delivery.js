@@ -104,6 +104,11 @@ const Delivery = {
       values.push(filters.endDate);
     }
 
+      // Filtrage par client_id (utilisateur connecté) toujours en premier
+      if (filters.client_id) {
+        where.unshift('d.client_id = ?');
+        values.unshift(filters.client_id);
+      }
       if (where.length > 0) {
         sql += '\n WHERE ' + where.join(' AND ');
         countSql += '\n WHERE ' + where.join(' AND ');
@@ -111,16 +116,15 @@ const Delivery = {
       }
 
       // Pagination
-      let page = 1;
-      let pageSize = 3;
-      if (filters.page && !isNaN(Number(filters.page))) page = Number(filters.page);
-      if (filters.pageSize && !isNaN(Number(filters.pageSize))) pageSize = Number(filters.pageSize);
-      const offset = (page - 1) * pageSize;
+  let page = 1;
+  let pageSize = 3;
+  if (filters.page && !isNaN(Number(filters.page))) page = Math.max(1, Number(filters.page));
+  if (filters.pageSize && !isNaN(Number(filters.pageSize))) pageSize = Math.max(1, Number(filters.pageSize));
+  const offset = (page - 1) * pageSize;
 
-      // default ordering
-      sql += '\n ORDER BY d.created_at DESC';
-      sql += `\n LIMIT ? OFFSET ?`;
-      values.push(pageSize, offset);
+  // default ordering
+  sql += '\n ORDER BY d.created_at DESC';
+  sql += `\n LIMIT ${pageSize} OFFSET ${offset}`;
 
       // Query for data and total
       const [results] = await db.query(sql, values);
