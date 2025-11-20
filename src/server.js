@@ -1,13 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const company = require('./routes/company');
 require('dotenv').config();
-
+const companyRoutes = require('./routes/company');
 const authRoutes = require('./routes/auth.routes');
 const profileRoutes = require('./routes/profile.routes');
 const contactRoutes = require('./routes/contact.routes');
 const allCompaniesRoutes = require('./routes/allCompanies.routes');
+const userRoutes = require('./routes/user');
 
 const app = express();
 const PORT = process.env.PORT || 3200;
@@ -20,7 +20,8 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/company', company);
+app.use('/company', companyRoutes);
+app.use('/user', userRoutes);       // nouveau : toutes les routes User préfixées par /user
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
