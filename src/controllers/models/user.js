@@ -80,13 +80,23 @@ User.update = async function (id, user, result) {
 // ----------------- DELETE -----------------
 User.delete = async function (id, result) {
     try {
-        const [res] = await db.query("DELETE FROM users WHERE id = ?", [id]);
-        if (res.affectedRows == 0) {
-            result({ kind: "not_found" }, null);
-        } else {
-            console.log("User deleted with ID: ", id);
-            result(null, res);
+        // First, check if user exists and get their role
+        const [user] = await db.query("SELECT id, role FROM users WHERE id = ?", [id]);
+        
+        if (user.length === 0) {
+            return result({ kind: "not_found" }, null);
         }
+        
+        // If user is a company, delete the associated company record first
+        if (user[0].role === 'company') {
+            await db.query("DELETE FROM companies WHERE user_id = ?", [id]);
+            console.log("Associated company deleted for user ID:", id);
+        }
+        
+        // Then delete the user
+        const [res] = await db.query("DELETE FROM users WHERE id = ?", [id]);
+        console.log("User deleted with ID:", id);
+        result(null, res);
     } catch (err) {
         console.log("error: ", err);
         result(err, null);

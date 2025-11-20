@@ -67,13 +67,23 @@ Company.update = async function (id, company, result) {
 // ----------------- DELETE -----------------
 Company.delete = async function (id, result) {
     try {
-        const [res] = await db.query("DELETE FROM companies WHERE id = ?", [id]);
-        if (res.affectedRows == 0) {
-            result({ kind: "not_found" }, null);
-        } else {
-            console.log("Company deleted with ID: ", id);
-            result(null, res);
+        // First, get the user_id associated with this company
+        const [company] = await db.query("SELECT user_id FROM companies WHERE id = ?", [id]);
+        
+        if (company.length === 0) {
+            return result({ kind: "not_found" }, null);
         }
+        
+        const userId = company[0].user_id;
+        
+        // Delete the company first (to avoid foreign key constraint issues)
+        const [companyRes] = await db.query("DELETE FROM companies WHERE id = ?", [id]);
+        
+        // Then delete the associated user
+        await db.query("DELETE FROM users WHERE id = ?", [userId]);
+        
+        console.log("Company and associated user deleted. Company ID:", id, "User ID:", userId);
+        result(null, companyRes);
     } catch (err) {
         console.log("error: ", err);
         result(err, null);
