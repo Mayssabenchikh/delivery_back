@@ -3,17 +3,12 @@ const pool = require("../config/database");
 exports.getComapanies = async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    const [comapanies] = await connection.execute("SELECT c.id, c.name, u.email, u.phone, u.address, c.logo_url, u.status FROM companies c join users u on c.user_id = u.id where u.status = 'active'");
-    
-    const baseUrl = process.env.SERVER_URL || 'http://localhost:3200';
-    const companiesWithFullUrls = comapanies.map(company => ({
-      ...company,
-      logo_url: company.logo_url ? `${baseUrl}/uploads/${company.logo_url}` : null
-    }));
-
+    const [comapanies] = await connection.execute(
+      "SELECT c.id, c.name, u.email, u.phone, u.address, c.logo_url, u.status FROM companies c JOIN users u ON c.user_id = u.id WHERE u.status = 'active'"
+    );
     res.json({
       success: true,
-      data: companiesWithFullUrls,
+      data: comapanies,
     });
   } catch (error) {
     console.error('Get Companies Error:', error);
@@ -31,11 +26,6 @@ exports.getCompany = async (req, res) => {
   try {
     const { id } = req.params;
     const [company] = await connection.execute("SELECT c.id, c.name, u.email, u.phone, u.address, c.logo_url, u.status FROM companies c join users u on c.user_id = u.id where c.id = ? AND u.status = 'active'", [id]);
-    
-    if (company[0] && company[0].logo_url) {
-      const baseUrl = process.env.SERVER_URL || 'http://localhost:3200';
-      company[0].logo_url = `${baseUrl}/uploads/${company[0].logo_url}`;
-    }
 
     res.json({
       success: true,
