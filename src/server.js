@@ -1,10 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
-const companyRoutes = require('./routes/company');
+const companyRoutes = require('./routes/company.routes');
 const authRoutes = require('./routes/auth.routes');
 const profileRoutes = require('./routes/profile.routes');
+const kpiRoutes = require('./routes/kpi.routes');
+const locationRoutes = require("./routes/location.routes");
+const deliveryRoutes = require("./routes/delivery.routes");
 const contactRoutes = require('./routes/contact.routes');
 const allCompaniesRoutes = require('./routes/allCompanies.routes');
 const userRoutes = require('./routes/user');
@@ -21,6 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/company', companyRoutes);
+app.use('/api/company', companyRoutes);
 app.use('/user', userRoutes);       // nouveau : toutes les routes User préfixées par /user
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -28,6 +31,9 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/kpi', kpiRoutes);
+app.use("/api/location", locationRoutes);
+app.use("/api/delivery", deliveryRoutes);
 app.use('/api/contact', contactRoutes)
 app.use('/api/allCompanies', allCompaniesRoutes)
 
