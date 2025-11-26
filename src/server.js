@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const http = require('http');
 const company = require('./routes/company.routes');
 require('dotenv').config();
 
@@ -9,9 +10,15 @@ const profileRoutes = require('./routes/profile.routes');
 const kpiRoutes = require('./routes/kpi.routes');
 const locationRoutes = require("./routes/location.routes");
 const deliveryRoutes = require("./routes/delivery.routes");
+const chatRoutes = require("./routes/chat.routes");
+const { initializeSocket } = require('./services/socket.service');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3200;
+
+// Initialiser Socket.io
+initializeSocket(server);
 
 // Middlewares
 app.use(cors({
@@ -31,6 +38,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/kpi', kpiRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/delivery", deliveryRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Route de test
 app.get('/api/health', (req, res) => {
@@ -45,9 +53,8 @@ app.use((req, res) => {
 // Servir les fichiers uploadés
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-
-
 // Démarrage du serveur
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📡 Socket.io initialized`);
 });
