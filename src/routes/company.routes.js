@@ -86,7 +86,7 @@ router.get('/all', async (req, res) => {
 	const connection = await pool.getConnection();
 	try {
 		const [companies] = await connection.execute(
-			"SELECT c.id, c.name, u.email, u.phone, u.address, c.logo_url, u.status FROM companies c JOIN users u ON c.user_id = u.id WHERE u.status = 'active'"
+			"SELECT * FROM companies c JOIN users u ON c.user_id = u.id WHERE u.status = 'active'"
 		);
 		res.json({ success: true, data: companies });
 	} catch (error) {
