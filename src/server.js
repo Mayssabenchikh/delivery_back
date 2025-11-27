@@ -11,6 +11,8 @@ const kpiRoutes = require('./routes/kpi.routes');
 const locationRoutes = require("./routes/location.routes");
 const deliveryRoutes = require("./routes/delivery.routes");
 const chatRoutes = require("./routes/chat.routes");
+const delivery2Routes = require('./routes/deliveries');
+const profilelivreurRoutes = require('./routes/profilelivreur');
 const { initializeSocket } = require('./services/socket.service');
 
 const app = express();
@@ -30,6 +32,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/company', company);
 app.use('/api/company', company);
+app.use('/api/deliveries', delivery2Routes);
+
+// Profile livreur (routes protégées par middleware interne)
+app.use('/api/profilelivreur', profilelivreurRoutes);
 
 
 // Routes
@@ -52,6 +58,8 @@ app.use((req, res) => {
 
 // Servir les fichiers uploadés
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 
 // Démarrage du serveur
 server.listen(PORT, () => {

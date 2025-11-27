@@ -3,10 +3,14 @@ const Delivery = require('../models/delivery');
 exports.createDelivery = async (req, res) => {
   try {
     const data = req.body;
+    console.log('📦 [CONTROLLER] Received delivery data:', JSON.stringify(data, null, 2));
+    console.log('📦 [CONTROLLER] payment_amount in body:', data.payment_amount);
     // TODO: validate data
     const result = await Delivery.create(data);
+    console.log('📦 [CONTROLLER] Delivery created with ID:', result.insertId);
     res.status(201).json({ success: true, id: result.insertId });
   } catch (error) {
+    console.error('📦 [CONTROLLER] Error creating delivery:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
