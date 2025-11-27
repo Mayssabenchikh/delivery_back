@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { createDelivery } = require('../controllers/delivery.controller');
+const deliveryController = require('../controllers/delivery.controller');
 
-router.post('/', createDelivery);
+router.post('/', deliveryController.createDelivery);
+router.get('/', deliveryController.getAllDeliveries);
+router.get('/history', deliveryController.getDeliveryHistory);
+// Cancel a delivery (set status -> cancelled)
+router.patch('/:id/cancel', deliveryController.cancelDelivery);
 
 module.exports = router;
