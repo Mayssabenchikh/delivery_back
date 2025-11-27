@@ -1,10 +1,33 @@
+// Get companies by user_id (only active)
+exports.getCompaniesByUserId = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { user_id } = req.params;
+    const [companies] = await connection.execute(
+      "SELECT c.id, u.id as user_id, c.name, u.email, u.phone, u.address, c.logo_url, u.status,c.tax_id, c.legal_status FROM companies c JOIN users u ON c.user_id = u.id WHERE u.id = ?",
+      [user_id]
+    );
+    res.json({
+      success: true,
+      data: companies,
+    });
+  } catch (error) {
+    console.error('Get Companies by user_id Error:', error);
+    res.status(500).json({
+      success: false,
+      message: "Server error. Please try again later.",
+    });
+  } finally {
+    connection.release();
+  }
+};
 const pool = require("../config/database");
 
 exports.getComapanies = async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const [comapanies] = await connection.execute(
-      "SELECT c.id, c.name, u.email, u.phone, u.address, c.logo_url, u.status FROM companies c JOIN users u ON c.user_id = u.id WHERE u.status = 'active'"
+      "SELECT c.id, u.id as user_id, c.name, u.email, u.phone, u.address, c.logo_url, u.status FROM companies c JOIN users u ON c.user_id = u.id WHERE u.status = 'active'"
     );
     res.json({
       success: true,
@@ -25,7 +48,7 @@ exports.getCompany = async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const { id } = req.params;
-    const [company] = await connection.execute("SELECT c.id, c.name, u.email, u.phone, u.address, c.logo_url, u.status FROM companies c join users u on c.user_id = u.id where c.id = ? AND u.status = 'active'", [id]);
+    const [company] = await connection.execute("SELECT c.id, u.id as user_id,c.name, u.email, u.phone, u.address, c.logo_url, u.status FROM companies c join users u on c.user_id = u.id where c.id = ? AND u.status = 'active'", [id]);
 
     res.json({
       success: true,
