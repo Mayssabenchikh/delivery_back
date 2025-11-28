@@ -13,6 +13,12 @@ const deliveryRoutes = require("./routes/delivery.routes");
 const chatRoutes = require("./routes/chat.routes");
 const delivery2Routes = require('./routes/deliveries');
 const profilelivreurRoutes = require('./routes/profilelivreur');
+/****************** */
+const driversRoutes = require('./routes/company/drivers.routes');
+const deliveriescomRoutes = require('./routes/company/deliveries.routes');
+const statisticsRoutes = require('./routes/company/statistics.routes');
+const companyRoutes = require('./routes/company/company.routes');
+
 const { initializeSocket } = require('./services/socket.service');
 
 const app = express();
@@ -45,7 +51,12 @@ app.use('/api/kpi', kpiRoutes);
 app.use("/api/location", locationRoutes);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/chat", chatRoutes);
-
+/******************** */
+app.use('/api/company/company', companyRoutes);
+app.use('/api/company', companyRoutes); // Also mount on /api/company for info and profile routes
+app.use('/api/company/drivers', driversRoutes);
+app.use('/api/company/deliveries', deliveriescomRoutes);
+app.use('/api/company/statistics', statisticsRoutes);
 // Route de test
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });

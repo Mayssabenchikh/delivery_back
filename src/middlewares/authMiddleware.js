@@ -36,5 +36,10 @@ const authorizeRoles = (...roles) => {
   };
 };
 
+// Export as default for backward compatibility
 module.exports = authenticateToken;
 module.exports.authorizeRoles = authorizeRoles;
+
+// Export with names expected by company routes
+module.exports.authMiddleware = authenticateToken;
+module.exports.isCompany = authorizeRoles('company');
