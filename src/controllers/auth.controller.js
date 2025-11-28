@@ -100,8 +100,30 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Incorrect password' });
     }
 
+    // Si l'utilisateur est une company, récupérer le companyId
+    let companyId = null;
+    if (user.role === 'company') {
+      const [companies] = await connection.execute(
+        'SELECT id FROM companies WHERE user_id = ?',
+        [user.id]
+      );
+      if (companies.length > 0) {
+        companyId = companies[0].id;
+      }
+    }
+
+    // Créer le payload du token avec companyId si disponible
+    const tokenPayload = { 
+      id: user.id, 
+      role: user.role, 
+      email: user.email 
+    };
+    if (companyId) {
+      tokenPayload.companyId = companyId;
+    }
+
     const token = jwt.sign(
-      { id: user.id, role: user.role, email: user.email },
+      tokenPayload,
       process.env.JWT_SECRET,
       { expiresIn: '12h' }
     );
@@ -118,6 +140,7 @@ exports.login = async (req, res) => {
         status : user.status,
         phone: user.phone,
         address: user.address,
+        companyId: companyId,
         createdAt: user.created_at
       },
     });
