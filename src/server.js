@@ -34,7 +34,7 @@ initializeSocket(server);
 
 // Middlewares
 app.use(cors({
-  origin: 'http://localhost:4200', // URL de ton Angular
+  origin: '*',
   credentials: true
 }));
 app.use(express.json());
