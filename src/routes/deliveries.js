@@ -32,6 +32,7 @@ router.delete('/:id', DeliveryController.deleteDelivery);
 // Routes spécifiques
 router.post('/:id/delivered', DeliveryController.markDelivered);
 router.post('/:id/returned', DeliveryController.markReturned);
+router.post('/:id/in_transit', DeliveryController.markReturned);
 router.patch('/:id/assign', DeliveryController.assignDriver);
 
 module.exports = router;

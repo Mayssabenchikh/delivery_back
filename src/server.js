@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const companyRoutes = require('./routes/company.routes');
+const companyRoutesV2 = require('./routes/company/company.routes');
+
 const http = require('http');
 require('dotenv').config();
 
@@ -19,7 +21,6 @@ const profilelivreurRoutes = require('./routes/profilelivreur');
 const driversRoutes = require('./routes/company/drivers.routes');
 const deliveriescomRoutes = require('./routes/company/deliveries.routes');
 const statisticsRoutes = require('./routes/company/statistics.routes');
-const companyRoutes = require('./routes/company/company.routes');
 
 const { initializeSocket } = require('./services/socket.service');
 const kpiRoutes = require('./routes/kpi.routes');
@@ -49,7 +50,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
 app.use('/company', companyRoutes);
-app.use('/api/company', companyRoutes);
+app.use('/api/company', companyRoutesV2);
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/kpi', kpiRoutes);
@@ -59,8 +60,6 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/allCompanies', allCompaniesRoutes);
 app.use("/api/chat", chatRoutes);
 /******************** */
-app.use('/api/company/company', companyRoutes);
-app.use('/api/company', companyRoutes); // Also mount on /api/company for info and profile routes
 app.use('/api/company/drivers', driversRoutes);
 app.use('/api/company/deliveries', deliveriescomRoutes);
 app.use('/api/company/statistics', statisticsRoutes);

@@ -72,6 +72,25 @@ exports.markDelivered = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+exports.markintransit = async (req, res) => {
+  try {
+    const deliveryId = req.params.id;
+    // Mettre à jour le status et completed_at en même temps
+    const query = 'UPDATE deliveries SET status = ?, completed_at = NOW(), updated_at = NOW() WHERE id = ?';
+    const status = 'in_transit';
+
+    const [result] = await db.query(query, [status, deliveryId]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Delivery not found' });
+    }
+    
+    res.json({ message: 'Delivery marked as in transit', deliveryId, status });
+  } catch (err) {
+    console.error('Erreur lors de la mise à jour du status:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
 
 exports.assignDriver = async (req, res) => {
   try {
