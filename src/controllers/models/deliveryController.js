@@ -72,6 +72,7 @@ exports.markDelivered = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 exports.markintransit = async (req, res) => {
   try {
     const deliveryId = req.params.id;
